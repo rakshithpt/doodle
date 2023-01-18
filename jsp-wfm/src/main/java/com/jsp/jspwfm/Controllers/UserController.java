@@ -1,12 +1,14 @@
 package com.jsp.jspwfm.Controllers;
 
+import com.jsp.jspwfm.Exceptions.TaskFailedException;
+import com.jsp.jspwfm.Exceptions.UserAlreadyExistsException;
+import com.jsp.jspwfm.Exceptions.UserNotFoundException;
 import com.jsp.jspwfm.Models.Entities.OrderDetails;
 import com.jsp.jspwfm.Models.Entities.Product;
 import com.jsp.jspwfm.Models.Entities.User;
 import com.jsp.jspwfm.Services.UserService;
 
-import java.util.HashMap;
-import java.util.Map;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
@@ -43,7 +45,7 @@ public class UserController {
 	//} 
 	
 	@PostMapping("/signupuser")
-	public ResponseEntity<String> signUpUser(@RequestBody User user) {
+	public ResponseEntity<String> signUpUser(@RequestBody User user) throws UserAlreadyExistsException {
 		User user2 = userService.signUpUser(user);
 		if (user2 != null) {
 			return ResponseEntity.status(200).body("SIGN UP SUCCESSFULL");
@@ -60,8 +62,8 @@ public class UserController {
 	//	    "productQuantity" : 100
 	//	}
 	
-	@PostMapping("/addproduct")
-	public ResponseEntity<Product> addProduct(@RequestBody Product product) {
+	@PostMapping("/addproduct") 
+	public ResponseEntity<Product> addProduct(@RequestBody Product product) throws UserAlreadyExistsException {
 		Product product2 = userService.addProduct(product);
 		return ResponseEntity.status(200).body(product2);
 	}
@@ -74,7 +76,7 @@ public class UserController {
 	
 	
 	@RequestMapping("/loginuser")
-	public ResponseEntity<String> loginUser(@RequestHeader String username, @RequestHeader String password) {
+	public ResponseEntity<String> loginUser(@RequestHeader String username, @RequestHeader String password) throws UserNotFoundException {
 		if (userService.loginUser(username, password)) {
 			return ResponseEntity.status(200).body("LOGIN SUCCESS");
 
@@ -94,7 +96,7 @@ public class UserController {
 
 	@RequestMapping("/orderbyuserid")
 	public ResponseEntity<String> oderByUserId(@RequestHeader Integer userId, @RequestHeader Integer productId,
-			@RequestHeader Integer productQuantity) {
+			@RequestHeader Integer productQuantity) throws TaskFailedException {
 		if (userService.checkUserId(userId)) {
 			if (userService.checkProductId(productId)) {
 				userService.updateProductQuantity(productQuantity, productId);
@@ -115,7 +117,7 @@ public class UserController {
 
 
 	@RequestMapping("getproductdetails")
-	public ResponseEntity<String> getProductDetails(@RequestHeader Integer productId) {
+	public ResponseEntity<String> getProductDetails(@RequestHeader Integer productId) throws TaskFailedException {
 //    	Product product = userService.getProductDetails(productId);
 		return ResponseEntity.status(200).body(userService.getProductDetails(productId));
 	}
@@ -125,7 +127,7 @@ public class UserController {
 	// userId :  125
 
 	@RequestMapping("getordedetailsbyuserid")
-	public ResponseEntity<OrderDetails> getOrderDetailsByUserId(@RequestHeader Integer userId) {
+	public ResponseEntity<OrderDetails> getOrderDetailsByUserId(@RequestHeader Integer userId) throws UserNotFoundException{
 		OrderDetails details = userService.getOrderDetailsByUserId(userId);
 		return ResponseEntity.status(200).body(details);
 	}
